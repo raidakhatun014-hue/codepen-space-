@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Package Project
+        run: |
+          zip -r release.zip . \
+            -x ".git/*" \
+            -x ".github/*"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release.zip
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, 'beta') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
